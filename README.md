@@ -20,7 +20,7 @@ var columnsList = [{
                     }
                 },
                 ...
-                ]
+                ];
 
 
 this.$container = $("#container");
