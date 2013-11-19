@@ -4,6 +4,35 @@ Handsontable-select2-editor
 Handsontable Select2 Editor
 
 
+
+Using this custom editor
+
+var optionsList = [{id: 1, text: 'jsmith'}, {id: 2, text: 'wjones'}, ...];
+var columnsList = [{
+                    data: "UserName", // from datasource
+                    editor: 'select2',
+                    select2Options: {
+                        data: optionsList,
+                        dropdownAutoWidth: true,
+                        allowClear: true,
+                        width: 'resolve'
+                    }
+                },
+                ...
+                ]
+
+
+this.$container = $("#container");
+this.$container.handsontable({
+    data: [...],
+    columns: columnsList
+    });
+
+I've left out a lot here for brevity, so let me know if any clarification is required.
+
+
+
+
 License
 
 (The MIT License)
