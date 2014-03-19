@@ -12,7 +12,7 @@ var optionsList = [{id: 1, text: 'jsmith'}, {id: 2, text: 'wjones'}, ...];
 var columnsList = [{
                     data: "UserName", // from datasource
                     editor: 'select2',
-                    select2Options: {
+                    select2Options: { // these options are the select2 initialization options 
                         data: optionsList,
                         dropdownAutoWidth: true,
                         allowClear: true,
