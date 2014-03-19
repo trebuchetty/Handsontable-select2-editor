@@ -78,18 +78,6 @@
         }
 
         switch (event.keyCode) {
-            //case keyCodes.ARROW_RIGHT:
-            //    if (that.wtDom.getCaretPosition(that.TEXTAREA) !== that.TEXTAREA.value.length) {
-            //        event.stopImmediatePropagation();
-            //    }
-            //    break;
-
-            //case keyCodes.ARROW_LEFT: /* arrow left */
-            //    if (that.wtDom.getCaretPosition(that.TEXTAREA) !== 0) {
-            //        event.stopImmediatePropagation();
-            //    }
-            //    break;
-
             case keyCodes.ENTER:
                 var selected = that.instance.getSelected();
                 var isMultipleSelection = !(selected[0] === selected[2] && selected[1] === selected[3]);
@@ -113,8 +101,6 @@
                     event.stopImmediatePropagation(); //CTRL+A, CTRL+C, CTRL+V, CTRL+X should only work locally when cell is edited (not in table context)
                     break;
                 }
-            //case keyCodes.BACKSPACE:
-            //case keyCodes.DELETE:
             case keyCodes.HOME:
             case keyCodes.END:
                 event.stopImmediatePropagation(); //backspace, delete, home, end should only work locally when cell is edited (not in table context)
@@ -124,10 +110,8 @@
     };
 
     Select2Editor.prototype.open = function () {
-        //Handsontable.editors.TextEditor.prototype.open.apply(this, arguments);
         this.refreshDimensions(); //need it instantly, to prevent https://github.com/warpech/jquery-handsontable/issues/348
         this.TEXTAREA.focus();
-        //this.wtDom.setCaretPosition(this.TEXTAREA, this.TEXTAREA.value.length);
 
         this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
 
@@ -143,10 +127,9 @@
             .on("select2-open", function (event) {
                 var search = $('.select2-drop-active .select2-search .select2-input');
                 search.val(self.$textarea.val()).trigger('paste');
-                //console.log("opened", event, this);
             });
 
-        //this.$textarea.select2('val', this.$textarea.val());
+        // timeout is required to allow enough time for the select2 dropdown to open
         setTimeout(function () {
             self.$textarea.select2('focus');
             self.$textarea.select2('container').find('.select2-choice').trigger('mousedown').trigger('mouseup').trigger('click');
