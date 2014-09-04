@@ -12,8 +12,6 @@
         if (this.cellProperties.select2Options) {
             this.options = $.extend(this.options, cellProperties.select2Options);
         }
-
-        
     };
 
     Select2Editor.prototype.createElements = function () {
@@ -21,6 +19,7 @@
         this.wtDom = Handsontable.Dom;
 
         this.TEXTAREA = document.createElement('input');
+        this.TEXTAREA.setAttribute('type', 'text');
         this.$textarea = $(this.TEXTAREA);
         
         this.wtDom.addClass(this.TEXTAREA, 'handsontableInput');
@@ -103,22 +102,28 @@
                 }
             case keyCodes.HOME:
             case keyCodes.END:
-                event.stopImmediatePropagation(); //backspace, delete, home, end should only work locally when cell is edited (not in table context)
+                event.stopImmediatePropagation(); //home, end should only work locally when cell is edited (not in table context)
                 break;
         }
 
     };
 
-    Select2Editor.prototype.open = function () {
-        this.refreshDimensions(); //need it instantly, to prevent https://github.com/warpech/jquery-handsontable/issues/348
-        this.TEXTAREA.focus();
+    
 
+    Select2Editor.prototype.open = function () {
+        this.textareaParentStyle.display = 'block';
         this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
 
         this.$textarea.css({
-            height: 'auto',
-            width: 'auto'
+            height: $(this.TD).height(),
+            'min-width': $(this.TD).outerWidth()
         });
+
+        //display the list
+        this.$textarea.show();
+
+        //make sure that list positions matches cell position
+        this.$textarea.offset($(this.TD).offset());
 
         var self = this;
         this.$textarea.select2(this.options)
@@ -129,12 +134,10 @@
                 search.val(self.$textarea.val()).trigger('paste');
             });
 
-        // timeout is required to allow enough time for the select2 dropdown to open
         setTimeout(function () {
             self.$textarea.select2('focus');
-            self.$textarea.select2('container').find('.select2-choice').trigger('mousedown').trigger('mouseup').trigger('click');
+            self.$textarea.select2('container').find('.select2-choice').trigger('mousedown').trigger('mouseup');
         }, 50);
-        
 
     };
 
@@ -142,6 +145,7 @@
         this.instance.listen();
         this.instance.removeHook('beforeKeyDown', onBeforeKeyDown);
         this.$textarea.off();
+        this.$textarea.hide();
         Handsontable.editors.TextEditor.prototype.close.apply(this, arguments);
     };
 
@@ -157,7 +161,8 @@
 
         this.instance.listen();
 
-        Handsontable.editors.TextEditor.prototype.focus.apply(this, arguments);
+        // DO NOT CALL THE BASE TEXTEDITOR FOCUS METHOD HERE, IT CAN MAKE THIS EDITOR BEHAVE POORLY AND HAS NO PURPOSE WITHIN THE CONTEXT OF THIS EDITOR
+        //Handsontable.editors.TextEditor.prototype.focus.apply(this, arguments);
     };
 
     Select2Editor.prototype.beginEditing = function (initialValue) {
@@ -172,7 +177,6 @@
 
     Select2Editor.prototype.finishEditing = function (isCancelled, ctrlDown) {
         this.instance.listen();
-        //this.$textarea.select2('destroy');
         return Handsontable.editors.TextEditor.prototype.finishEditing.apply(this, arguments);
     };
 
