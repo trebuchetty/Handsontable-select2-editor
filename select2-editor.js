@@ -1,3 +1,4 @@
+/// select2 plugin
 (function (Handsontable) {
     "use strict";
 
@@ -16,20 +17,19 @@
 
     Select2Editor.prototype.createElements = function () {
         this.$body = $(document.body);
-        this.wtDom = Handsontable.Dom;
 
         this.TEXTAREA = document.createElement('input');
         this.TEXTAREA.setAttribute('type', 'text');
         this.$textarea = $(this.TEXTAREA);
-        
-        this.wtDom.addClass(this.TEXTAREA, 'handsontableInput');
+
+        Handsontable.Dom.addClass(this.TEXTAREA, 'handsontableInput');
 
         this.textareaStyle = this.TEXTAREA.style;
         this.textareaStyle.width = 0;
         this.textareaStyle.height = 0;
 
         this.TEXTAREA_PARENT = document.createElement('DIV');
-        this.wtDom.addClass(this.TEXTAREA_PARENT, 'handsontableInputHolder');
+        Handsontable.Dom.addClass(this.TEXTAREA_PARENT, 'handsontableInputHolder');
 
         this.textareaParentStyle = this.TEXTAREA_PARENT.style;
         this.textareaParentStyle.top = 0;
@@ -41,11 +41,9 @@
         this.instance.rootElement.appendChild(this.TEXTAREA_PARENT);
 
         var that = this;
-        Handsontable.PluginHooks.add('afterRender', function () {
-            that.instance._registerTimeout('refresh_editor_dimensions', function () {
-                that.refreshDimensions();
-            }, 0);
-        });
+        this.instance._registerTimeout(setTimeout(function () {
+            that.refreshDimensions();
+        }, 0));
     };
 
     var onSelect2Changed = function () {
@@ -56,8 +54,7 @@
         this.close();
         this.finishEditing();
     };
-    var onBeforeKeyDown = function onBeforeKeyDown(event) {
-
+    var onBeforeKeyDown = function (event) {
         var instance = this;
         var that = instance.getActiveEditor();
 
@@ -66,17 +63,34 @@
 
 
         //Process only events that have been fired in the editor
-        if (event.target !== that.TEXTAREA || event.isImmediatePropagationStopped()) {
+        if (!$(event.target).hasClass('select2-input') || event.isImmediatePropagationStopped()) {
             return;
         }
-
         if (event.keyCode === 17 || event.keyCode === 224 || event.keyCode === 91 || event.keyCode === 93) {
             //when CTRL or its equivalent is pressed and cell is edited, don't prepare selectable text in textarea
             event.stopImmediatePropagation();
             return;
         }
 
+        var target = event.target;
+
         switch (event.keyCode) {
+            case keyCodes.ARROW_RIGHT:
+                if (Handsontable.Dom.getCaretPosition(target) !== target.value.length) {
+                    event.stopImmediatePropagation();
+                } else {
+                    that.$textarea.select2('close');
+                }
+                break;
+
+            case keyCodes.ARROW_LEFT:
+                if (Handsontable.Dom.getCaretPosition(target) !== 0) {
+                    event.stopImmediatePropagation();
+                } else {
+                    that.$textarea.select2('close');
+                }
+                break;
+
             case keyCodes.ENTER:
                 var selected = that.instance.getSelected();
                 var isMultipleSelection = !(selected[0] === selected[2] && selected[1] === selected[3]);
@@ -98,17 +112,18 @@
             case keyCodes.V:
                 if (ctrlDown) {
                     event.stopImmediatePropagation(); //CTRL+A, CTRL+C, CTRL+V, CTRL+X should only work locally when cell is edited (not in table context)
-                    break;
                 }
+                break;
+
+            case keyCodes.BACKSPACE:
+            case keyCodes.DELETE:
             case keyCodes.HOME:
             case keyCodes.END:
-                event.stopImmediatePropagation(); //home, end should only work locally when cell is edited (not in table context)
+                event.stopImmediatePropagation(); //backspace, delete, home, end should only work locally when cell is edited (not in table context)
                 break;
         }
 
     };
-
-    
 
     Select2Editor.prototype.open = function () {
 		this.refreshDimensions();
@@ -116,8 +131,8 @@
         this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
 
         this.$textarea.css({
-            height: $(this.TD).height(),
-            'min-width': $(this.TD).outerWidth()
+            height: $(this.TD).height() + 4,
+            'min-width': $(this.TD).outerWidth() - 4
         });
 
         //display the list
@@ -129,17 +144,13 @@
         var self = this;
         this.$textarea.select2(this.options)
             .on('change', onSelect2Changed.bind(this))
-            .on('select2-close', onSelect2Closed.bind(this))
-            .on("select2-open", function (event) {
-                var search = $('.select2-drop-active .select2-search .select2-input');
-                search.val(self.$textarea.val()).trigger('paste');
-            });
+            .on('select2-close', onSelect2Closed.bind(this));
 
-        setTimeout(function () {
-            self.$textarea.select2('focus');
-            self.$textarea.select2('container').find('.select2-choice').trigger('mousedown').trigger('mouseup');
-        }, 50);
+        self.$textarea.select2('open');
+    };
 
+    Select2Editor.prototype.init = function () {
+        Handsontable.editors.TextEditor.prototype.init.apply(this, arguments);
     };
 
     Select2Editor.prototype.close = function () {
