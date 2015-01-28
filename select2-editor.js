@@ -3,7 +3,7 @@
 
     var Select2Editor = Handsontable.editors.TextEditor.prototype.extend();
 
-    Select2Editor.prototype.prepare = function (td, row, col, prop, value, cellProperties) {
+    Select2Editor.prototype.prepare = function (row, col, prop, td, originalValue, cellProperties) {
 
         Handsontable.editors.TextEditor.prototype.prepare.apply(this, arguments);
 
