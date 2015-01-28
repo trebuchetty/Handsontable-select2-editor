@@ -38,7 +38,7 @@
 
         this.TEXTAREA_PARENT.appendChild(this.TEXTAREA);
 
-        this.instance.rootElement[0].appendChild(this.TEXTAREA_PARENT);
+        this.instance.rootElement.appendChild(this.TEXTAREA_PARENT);
 
         var that = this;
         Handsontable.PluginHooks.add('afterRender', function () {
