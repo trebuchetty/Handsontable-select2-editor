@@ -3,6 +3,8 @@ Handsontable-select2-editor
 
 Handsontable Select2 Editor
 
+Here is a jsfiddle of this editor working with Select2 3.5.2 and Handsontable 0.15.0
+http://jsfiddle.net/trebuchetty/tLp0dnga/
 
 
 Using this custom editor
@@ -31,7 +33,6 @@ this.$container.handsontable({
 ```
 
 I've left out a lot here for brevity, so let me know if any clarification is required.
-
 
 
 
