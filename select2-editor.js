@@ -125,7 +125,7 @@
 
     };
 
-    Select2Editor.prototype.open = function () {
+    Select2Editor.prototype.open = function (keyboardEvent) {
 		this.refreshDimensions();
         this.textareaParentStyle.display = 'block';
         this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
@@ -147,6 +147,13 @@
             .on('select2-close', onSelect2Closed.bind(this));
 
         self.$textarea.select2('open');
+        
+        // Pushes initial character entered into the search field, if available
+        if (keyboardEvent && keyboardEvent.keyCode) {
+            var key = keyboardEvent.keyCode;
+            var keyText = (String.fromCharCode((96 <= key && key <= 105) ? key-48 : key)).toLowerCase();
+            self.$textarea.select2('search', keyText);
+        }
     };
 
     Select2Editor.prototype.init = function () {
