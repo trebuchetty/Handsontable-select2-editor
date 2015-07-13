@@ -42,7 +42,7 @@
 
         var that = this;
         Handsontable.PluginHooks.add('afterRender', function () {
-            that.instance.registerTimeout('refresh_editor_dimensions', function () {
+            that.instance._registerTimeout('refresh_editor_dimensions', function () {
                 that.refreshDimensions();
             }, 0);
         });
@@ -111,6 +111,7 @@
     
 
     Select2Editor.prototype.open = function () {
+		this.refreshDimensions();
         this.textareaParentStyle.display = 'block';
         this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
 
