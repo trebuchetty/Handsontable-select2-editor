@@ -60,6 +60,7 @@
     var onBeforeKeyDown = function (event) {
         var instance = this;
         var that = instance.getActiveEditor();
+        Handsontable.Dom.enableImmediatePropagation(event);
 
         var keyCodes = Handsontable.helper.keyCode;
         var ctrlDown = (event.ctrlKey || event.metaKey) && !event.altKey; //catch CTRL but not right ALT (which in some systems triggers ALT+CTRL)
@@ -180,6 +181,9 @@
         }
     };
 
+    Select2Editor.prototype.getValue = Select2Editor.prototype.val;
+    Select2Editor.prototype.setValue = Select2Editor.prototype.val;
+
     Select2Editor.prototype.focus = function () {
 
         this.instance.listen();
@@ -198,7 +202,7 @@
 
     };
 
-    Select2Editor.prototype.finishEditing = function (isCancelled, ctrlDown) {
+    Select2Editor.prototype.finishEditing = function (restoreOriginalValue, ctrlDown, callback) {
         this.instance.listen();
         return Handsontable.editors.TextEditor.prototype.finishEditing.apply(this, arguments);
     };
