@@ -122,6 +122,12 @@
             case keyCodes.END:
                 event.stopImmediatePropagation(); //backspace, delete, home, end should only work locally when cell is edited (not in table context)
                 break;
+
+            case keyCodes.ARROW_UP:
+            case keyCodes.ARROW_DOWN:
+                event.stopImmediatePropagation();
+                break;
+
         }
 
     };
