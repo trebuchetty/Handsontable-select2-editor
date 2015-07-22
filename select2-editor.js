@@ -139,10 +139,22 @@
 
     };
 
+    // Prevent direct opening of select2-editor after a selection has been made by pressing the enter key
+    var onBeforeKeyDownEnterKeySelectionWorkaround = function (event) {
+
+        var instance = this;
+        var that = instance.getActiveEditor();
+        Handsontable.Dom.enableImmediatePropagation(event);
+        that.instance.removeHook('beforeKeyDown', onBeforeKeyDownEnterKeySelectionWorkaround);
+        event.stopImmediatePropagation();
+
+    }
+
     Select2Editor.prototype.open = function (keyboardEvent) {
 
 		this.refreshDimensions();
         this.textareaParentStyle.display = 'block';
+        this.instance.removeHook('beforeKeyDown', onBeforeKeyDownEnterKeySelectionWorkaround);
         this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
 
         var self = this;
@@ -173,6 +185,8 @@
     Select2Editor.prototype.close = function () {
         this.instance.listen();
         this.instance.removeHook('beforeKeyDown', onBeforeKeyDown);
+        this.instance.removeHook('beforeKeyDown', onBeforeKeyDownEnterKeySelectionWorkaround);
+        this.instance.addHook('beforeKeyDown', onBeforeKeyDownEnterKeySelectionWorkaround);
         this.$textarea.off();
         this.$textarea.hide();
         this.$textarea.select2('close');
