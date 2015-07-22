@@ -50,11 +50,9 @@
     };
 
     var onSelect2Changed = function () {
-        this.close();
         this.finishEditing();
     };
     var onSelect2Closed = function () {
-        this.close();
         this.finishEditing();
     };
     var onBeforeKeyDown = function (event) {
@@ -169,6 +167,7 @@
         this.instance.removeHook('beforeKeyDown', onBeforeKeyDown);
         this.$textarea.off();
         this.$textarea.hide();
+        this.$textarea.select2('close');
         Handsontable.editors.TextEditor.prototype.close.apply(this, arguments);
     };
 
