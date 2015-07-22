@@ -6,6 +6,10 @@
 
     Select2Editor.prototype.prepare = function (row, col, prop, td, originalValue, cellProperties) {
 
+        // Prepare default selected value
+        this.OPTIONELEMENT.setAttribute('value', originalValue);
+        this.OPTIONELEMENT.innerHTML = td.innerHTML;
+
         Handsontable.editors.TextEditor.prototype.prepare.apply(this, arguments);
 
         this.options = {};
@@ -23,6 +27,9 @@
         this.$body = $(document.body);
 
         this.TEXTAREA = document.createElement('select');
+        this.OPTIONELEMENT = document.createElement('option');
+        this.OPTIONELEMENT.setAttribute('selected', 'selected');
+        this.TEXTAREA.appendChild(this.OPTIONELEMENT);
         this.$textarea = $(this.TEXTAREA);
 
         Handsontable.Dom.addClass(this.TEXTAREA, 'handsontableInput');
