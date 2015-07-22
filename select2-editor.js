@@ -10,7 +10,7 @@
 
         this.options = {};
 
-        if (this.cellProperties.select2Options) {
+        if (cellProperties.select2Options) {
             this.options = $.extend(this.options, cellProperties.select2Options);
         }
     };
