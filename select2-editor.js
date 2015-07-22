@@ -22,8 +22,7 @@
     Select2Editor.prototype.createElements = function () {
         this.$body = $(document.body);
 
-        this.TEXTAREA = document.createElement('input');
-        this.TEXTAREA.setAttribute('type', 'text');
+        this.TEXTAREA = document.createElement('select');
         this.$textarea = $(this.TEXTAREA);
 
         Handsontable.Dom.addClass(this.TEXTAREA, 'handsontableInput');
@@ -67,7 +66,10 @@
 
 
         //Process only events that have been fired in the editor
-        if (!$(event.target).hasClass('select2-input') || event.isImmediatePropagationStopped()) {
+        if (!($(event.target).hasClass('select2-search__field') || $(event.target.parentNode).hasClass('select2-search'))) {
+            return;
+        }
+        if (event.isImmediatePropagationStopped()) {
             return;
         }
         if (event.keyCode === 17 || event.keyCode === 224 || event.keyCode === 91 || event.keyCode === 93) {
