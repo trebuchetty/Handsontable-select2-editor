@@ -52,9 +52,6 @@
     var onSelect2Changed = function () {
         this.finishEditing();
     };
-    var onSelect2Closed = function () {
-        this.finishEditing();
-    };
     var onBeforeKeyDown = function (event) {
         var instance = this;
         var that = instance.getActiveEditor();
@@ -62,7 +59,6 @@
 
         var keyCodes = Handsontable.helper.keyCode;
         var ctrlDown = (event.ctrlKey || event.metaKey) && !event.altKey; //catch CTRL but not right ALT (which in some systems triggers ALT+CTRL)
-
 
         //Process only events that have been fired in the editor
         if (!($(event.target).hasClass('select2-search__field') || $(event.target.parentNode).hasClass('select2-search'))) {
@@ -131,23 +127,15 @@
     };
 
     Select2Editor.prototype.open = function (keyboardEvent) {
+
 		this.refreshDimensions();
         this.textareaParentStyle.display = 'block';
         this.textareaParentStyle.zIndex = 20000;
         this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
 
-        this.$textarea.css({
-            height: $(this.TD).height() + 4,
-            'min-width': $(this.TD).outerWidth() - 4
-        });
-
-        //display the list
-        this.$textarea.show();
-
         var self = this;
         this.$textarea.select2(this.options)
-            .on('change', onSelect2Changed.bind(this))
-            .on('select2-close', onSelect2Closed.bind(this));
+            .on('change', onSelect2Changed.bind(this));
 
         self.$textarea.select2('open');
         
