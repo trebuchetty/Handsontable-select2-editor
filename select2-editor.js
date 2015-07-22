@@ -144,6 +144,7 @@
             .on('change', onSelect2Changed.bind(this));
 
         self.$textarea.select2('open');
+        $(self.TEXTAREA_PARENT).find('.select2-selection').css('visibility', 'hidden');
         
         // Pushes initial character entered into the search field, if available
         if (keyboardEvent && keyboardEvent.keyCode) {
