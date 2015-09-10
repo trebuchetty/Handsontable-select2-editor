@@ -174,7 +174,7 @@
         if (keyboardEvent && keyboardEvent.keyCode) {
             var key = keyboardEvent.keyCode;
             var keyText = (String.fromCharCode((96 <= key && key <= 105) ? key-48 : key)).toLowerCase();
-            self.$textarea.select2('search', keyText);
+            //self.$textarea.select2('search', keyText);
         }
     };
 
