@@ -4,6 +4,9 @@
 
     var Select2Editor = Handsontable.editors.TextEditor.prototype.extend();
 
+    // Add select2Options to default settings, or else ngHandsontable will not allow it to be defined in the hot-col element
+    Handsontable.DefaultSettings.prototype.select2Options = {};
+
     Select2Editor.prototype.prepare = function (row, col, prop, td, originalValue, cellProperties) {
 
         // Prepare default selected value
@@ -16,10 +19,6 @@
 
         if (cellProperties.select2Options) {
             this.options = $.extend(this.options, cellProperties.select2Options);
-        }
-        // Also handle lowercase property (which may be used involuntary due to angular magic, for instance by using ngHandsontable)
-        if (cellProperties.select2options) {
-            this.options = $.extend(this.options, cellProperties.select2options);
         }
     };
 
@@ -62,21 +61,20 @@
     var onBeforeKeyDown = function (event) {
         var instance = this;
         var that = instance.getActiveEditor();
-        Handsontable.Dom.enableImmediatePropagation(event);
 
-        var keyCodes = Handsontable.helper.keyCode;
+        var keyCodes = Handsontable.helper.KEY_CODES;
         var ctrlDown = (event.ctrlKey || event.metaKey) && !event.altKey; //catch CTRL but not right ALT (which in some systems triggers ALT+CTRL)
 
         //Process only events that have been fired in the editor
         if (!($(event.target).hasClass('select2-search__field') || $(event.target.parentNode).hasClass('select2-search'))) {
             return;
         }
-        if (event.isImmediatePropagationStopped()) {
+        if (Handsontable.dom.isImmediatePropagationStopped(event)) {
             return;
         }
         if (event.keyCode === 17 || event.keyCode === 224 || event.keyCode === 91 || event.keyCode === 93) {
             //when CTRL or its equivalent is pressed and cell is edited, don't prepare selectable text in textarea
-            event.stopImmediatePropagation();
+            Handsontable.dom.stopImmediatePropagation(event);
             return;
         }
 
@@ -85,7 +83,7 @@
         switch (event.keyCode) {
             case keyCodes.ARROW_RIGHT:
                 if (Handsontable.Dom.getCaretPosition(target) !== target.value.length) {
-                    event.stopImmediatePropagation();
+                    Handsontable.dom.stopImmediatePropagation(event);
                 } else {
                     that.$textarea.select2('close');
                 }
@@ -93,7 +91,7 @@
 
             case keyCodes.ARROW_LEFT:
                 if (Handsontable.Dom.getCaretPosition(target) !== 0) {
-                    event.stopImmediatePropagation();
+                    Handsontable.dom.stopImmediatePropagation(event);
                 } else {
                     that.$textarea.select2('close');
                 }
@@ -109,7 +107,7 @@
                     } else {
                         that.beginEditing(that.originalValue + '\n')
                     }
-                    event.stopImmediatePropagation();
+                    Handsontable.dom.stopImmediatePropagation(event);
                 }
                 event.preventDefault(); //don't add newline to field
                 break;
@@ -119,7 +117,7 @@
             case keyCodes.C:
             case keyCodes.V:
                 if (ctrlDown) {
-                    event.stopImmediatePropagation(); //CTRL+A, CTRL+C, CTRL+V, CTRL+X should only work locally when cell is edited (not in table context)
+                    Handsontable.dom.stopImmediatePropagation(event); //CTRL+A, CTRL+C, CTRL+V, CTRL+X should only work locally when cell is edited (not in table context)
                 }
                 break;
 
@@ -127,12 +125,12 @@
             case keyCodes.DELETE:
             case keyCodes.HOME:
             case keyCodes.END:
-                event.stopImmediatePropagation(); //backspace, delete, home, end should only work locally when cell is edited (not in table context)
+                Handsontable.dom.stopImmediatePropagation(event); //backspace, delete, home, end should only work locally when cell is edited (not in table context)
                 break;
 
             case keyCodes.ARROW_UP:
             case keyCodes.ARROW_DOWN:
-                event.stopImmediatePropagation();
+                Handsontable.dom.stopImmediatePropagation(event);
                 break;
 
         }
@@ -144,9 +142,8 @@
 
         var instance = this;
         var that = instance.getActiveEditor();
-        Handsontable.Dom.enableImmediatePropagation(event);
         that.instance.removeHook('beforeKeyDown', onBeforeKeyDownEnterKeySelectionWorkaround);
-        event.stopImmediatePropagation();
+        Handsontable.dom.stopImmediatePropagation(event);
 
     }
 
