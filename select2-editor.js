@@ -128,6 +128,7 @@
     Select2Editor.prototype.open = function (keyboardEvent) {
 		this.refreshDimensions();
         this.textareaParentStyle.display = 'block';
+        this.textareaParentStyle.zIndex = 20000;
         this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
 
         this.$textarea.css({
