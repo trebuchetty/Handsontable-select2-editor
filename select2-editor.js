@@ -10,8 +10,12 @@
 
         this.options = {};
 
-        if (this.cellProperties.select2Options) {
+        if (cellProperties.select2Options) {
             this.options = $.extend(this.options, cellProperties.select2Options);
+        }
+        // Also handle lowercase property (which may be used involuntary due to angular magic, for instance by using ngHandsontable)
+        if (cellProperties.select2options) {
+            this.options = $.extend(this.options, cellProperties.select2options);
         }
     };
 
