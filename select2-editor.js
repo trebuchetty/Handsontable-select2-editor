@@ -4,13 +4,20 @@
 
     var Select2Editor = Handsontable.editors.TextEditor.prototype.extend();
 
+    // Add select2Options to default settings, or else ngHandsontable will not allow it to be defined in the hot-col element
+    Handsontable.DefaultSettings.prototype.select2Options = {};
+
     Select2Editor.prototype.prepare = function (row, col, prop, td, originalValue, cellProperties) {
+
+        // Prepare default selected value
+        this.OPTIONELEMENT.setAttribute('value', originalValue);
+        this.OPTIONELEMENT.innerHTML = td.innerHTML;
 
         Handsontable.editors.TextEditor.prototype.prepare.apply(this, arguments);
 
         this.options = {};
 
-        if (this.cellProperties.select2Options) {
+        if (cellProperties.select2Options) {
             this.options = $.extend(this.options, cellProperties.select2Options);
         }
     };
@@ -18,8 +25,10 @@
     Select2Editor.prototype.createElements = function () {
         this.$body = $(document.body);
 
-        this.TEXTAREA = document.createElement('input');
-        this.TEXTAREA.setAttribute('type', 'text');
+        this.TEXTAREA = document.createElement('select');
+        this.OPTIONELEMENT = document.createElement('option');
+        this.OPTIONELEMENT.setAttribute('selected', 'selected');
+        this.TEXTAREA.appendChild(this.OPTIONELEMENT);
         this.$textarea = $(this.TEXTAREA);
 
         Handsontable.Dom.addClass(this.TEXTAREA, 'handsontableInput');
@@ -47,28 +56,25 @@
     };
 
     var onSelect2Changed = function () {
-        this.close();
-        this.finishEditing();
-    };
-    var onSelect2Closed = function () {
-        this.close();
         this.finishEditing();
     };
     var onBeforeKeyDown = function (event) {
         var instance = this;
         var that = instance.getActiveEditor();
 
-        var keyCodes = Handsontable.helper.keyCode;
+        var keyCodes = Handsontable.helper.KEY_CODES;
         var ctrlDown = (event.ctrlKey || event.metaKey) && !event.altKey; //catch CTRL but not right ALT (which in some systems triggers ALT+CTRL)
 
-
         //Process only events that have been fired in the editor
-        if (!$(event.target).hasClass('select2-input') || event.isImmediatePropagationStopped()) {
+        if (!($(event.target).hasClass('select2-search__field') || $(event.target.parentNode).hasClass('select2-search'))) {
+            return;
+        }
+        if (Handsontable.dom.isImmediatePropagationStopped(event)) {
             return;
         }
         if (event.keyCode === 17 || event.keyCode === 224 || event.keyCode === 91 || event.keyCode === 93) {
             //when CTRL or its equivalent is pressed and cell is edited, don't prepare selectable text in textarea
-            event.stopImmediatePropagation();
+            Handsontable.dom.stopImmediatePropagation(event);
             return;
         }
 
@@ -77,7 +83,7 @@
         switch (event.keyCode) {
             case keyCodes.ARROW_RIGHT:
                 if (Handsontable.Dom.getCaretPosition(target) !== target.value.length) {
-                    event.stopImmediatePropagation();
+                    Handsontable.dom.stopImmediatePropagation(event);
                 } else {
                     that.$textarea.select2('close');
                 }
@@ -85,7 +91,7 @@
 
             case keyCodes.ARROW_LEFT:
                 if (Handsontable.Dom.getCaretPosition(target) !== 0) {
-                    event.stopImmediatePropagation();
+                    Handsontable.dom.stopImmediatePropagation(event);
                 } else {
                     that.$textarea.select2('close');
                 }
@@ -101,7 +107,7 @@
                     } else {
                         that.beginEditing(that.originalValue + '\n')
                     }
-                    event.stopImmediatePropagation();
+                    Handsontable.dom.stopImmediatePropagation(event);
                 }
                 event.preventDefault(); //don't add newline to field
                 break;
@@ -111,7 +117,7 @@
             case keyCodes.C:
             case keyCodes.V:
                 if (ctrlDown) {
-                    event.stopImmediatePropagation(); //CTRL+A, CTRL+C, CTRL+V, CTRL+X should only work locally when cell is edited (not in table context)
+                    Handsontable.dom.stopImmediatePropagation(event); //CTRL+A, CTRL+C, CTRL+V, CTRL+X should only work locally when cell is edited (not in table context)
                 }
                 break;
 
@@ -119,38 +125,54 @@
             case keyCodes.DELETE:
             case keyCodes.HOME:
             case keyCodes.END:
-                event.stopImmediatePropagation(); //backspace, delete, home, end should only work locally when cell is edited (not in table context)
+                Handsontable.dom.stopImmediatePropagation(event); //backspace, delete, home, end should only work locally when cell is edited (not in table context)
                 break;
+
+            case keyCodes.ARROW_UP:
+            case keyCodes.ARROW_DOWN:
+                Handsontable.dom.stopImmediatePropagation(event);
+                break;
+
         }
 
     };
 
+    // Prevent direct opening of select2-editor after a selection has been made by pressing the enter key
+    var onBeforeKeyDownEnterKeySelectionWorkaround = function (event) {
+
+        var instance = this;
+        var that = instance.getActiveEditor();
+        that.instance.removeHook('beforeKeyDown', onBeforeKeyDownEnterKeySelectionWorkaround);
+        Handsontable.dom.stopImmediatePropagation(event);
+
+    }
+
     Select2Editor.prototype.open = function (keyboardEvent) {
+
 		this.refreshDimensions();
         this.textareaParentStyle.display = 'block';
         this.textareaParentStyle.zIndex = 20000;
+        this.instance.removeHook('beforeKeyDown', onBeforeKeyDownEnterKeySelectionWorkaround);
         this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
-
-        this.$textarea.css({
-            height: $(this.TD).height() + 4,
-            'min-width': $(this.TD).outerWidth() - 4
-        });
-
-        //display the list
-        this.$textarea.show();
 
         var self = this;
         this.$textarea.select2(this.options)
-            .on('change', onSelect2Changed.bind(this))
-            .on('select2-close', onSelect2Closed.bind(this));
+            .on('change', onSelect2Changed.bind(this));
 
         self.$textarea.select2('open');
         
+        var selectionElement = $(self.TEXTAREA_PARENT).find('.select2-selection');
+        selectionElement.css({
+            height: $(self.TD).height() + 4,
+            'min-width': $(self.TD).outerWidth() - 4,
+            'visibility': 'hidden'
+        });
+
         // Pushes initial character entered into the search field, if available
         if (keyboardEvent && keyboardEvent.keyCode) {
             var key = keyboardEvent.keyCode;
             var keyText = (String.fromCharCode((96 <= key && key <= 105) ? key-48 : key)).toLowerCase();
-            self.$textarea.select2('search', keyText);
+            //self.$textarea.select2('search', keyText);
         }
     };
 
@@ -161,8 +183,11 @@
     Select2Editor.prototype.close = function () {
         this.instance.listen();
         this.instance.removeHook('beforeKeyDown', onBeforeKeyDown);
+        this.instance.removeHook('beforeKeyDown', onBeforeKeyDownEnterKeySelectionWorkaround);
+        this.instance.addHook('beforeKeyDown', onBeforeKeyDownEnterKeySelectionWorkaround);
         this.$textarea.off();
         this.$textarea.hide();
+        this.$textarea.select2('close');
         Handsontable.editors.TextEditor.prototype.close.apply(this, arguments);
     };
 
@@ -173,6 +198,9 @@
             this.$textarea.val(value);
         }
     };
+
+    Select2Editor.prototype.getValue = Select2Editor.prototype.val;
+    Select2Editor.prototype.setValue = Select2Editor.prototype.val;
 
     Select2Editor.prototype.focus = function () {
 
@@ -192,7 +220,7 @@
 
     };
 
-    Select2Editor.prototype.finishEditing = function (isCancelled, ctrlDown) {
+    Select2Editor.prototype.finishEditing = function (restoreOriginalValue, ctrlDown, callback) {
         this.instance.listen();
         return Handsontable.editors.TextEditor.prototype.finishEditing.apply(this, arguments);
     };
