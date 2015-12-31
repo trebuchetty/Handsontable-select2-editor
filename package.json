@@ -1,0 +1,27 @@
+{
+  "name": "handsontable-select2-editor",
+  "version": "1.0.0",
+  "description": "Handsontable Select2 Editor",
+  "main": "select2-editor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trebuchetty/Handsontable-select2-editor.git"
+  },
+  "keywords": [
+    "handsontable",
+    "select2"
+  ],
+  "author": "trebuchetty",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/trebuchetty/Handsontable-select2-editor/issues"
+  },
+  "homepage": "https://github.com/trebuchetty/Handsontable-select2-editor#readme",
+  "dependencies": {
+    "jquery": "^2.1.4",
+    "select2": "^4.0.1"
+  }
+}
