@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/trebuchetty/Handsontable-select2-editor/issues"
   },
-  "homepage": "https://github.com/trebuchetty/Handsontable-select2-editor#readme"
+  "homepage": "https://github.com/trebuchetty/Handsontable-select2-editor#readme",
+  "dependencies": {
+    "jquery": "^2.1.4",
+    "select2": "^4.0.1"
+  }
 }
