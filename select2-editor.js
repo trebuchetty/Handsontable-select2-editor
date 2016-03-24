@@ -9,17 +9,18 @@
         Handsontable.editors.TextEditor.prototype.prepare.apply(this, arguments);
 
         this.options = {};
+        this.optionsEvents = {};
 
         if (this.cellProperties.select2Options) {
             this.options = $.extend(this.options, cellProperties.select2Options);
+            this.optionsEvents = $.extend(this.options, cellProperties.select2OptionsEvents);
         }
     };
 
     Select2Editor.prototype.createElements = function () {
         this.$body = $(document.body);
 
-        this.TEXTAREA = document.createElement('input');
-        this.TEXTAREA.setAttribute('type', 'text');
+        this.TEXTAREA = document.createElement('select');
         this.$textarea = $(this.TEXTAREA);
 
         Handsontable.Dom.addClass(this.TEXTAREA, 'handsontableInput');
@@ -126,7 +127,7 @@
     };
 
     Select2Editor.prototype.open = function (keyboardEvent) {
-		this.refreshDimensions();
+        this.refreshDimensions();
         this.textareaParentStyle.display = 'block';
         this.textareaParentStyle.zIndex = 20000;
         this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
@@ -144,12 +145,18 @@
             .on('change', onSelect2Changed.bind(this))
             .on('select2-close', onSelect2Closed.bind(this));
 
+
+        var optionsEvents = this.optionsEvents;
+        if (optionsEvents['select2:selecting']) {
+            this.$textarea.on('select2:selecting', optionsEvents['select2:selecting']);
+        }
+
         self.$textarea.select2('open');
-        
+
         // Pushes initial character entered into the search field, if available
         if (keyboardEvent && keyboardEvent.keyCode) {
             var key = keyboardEvent.keyCode;
-            var keyText = (String.fromCharCode((96 <= key && key <= 105) ? key-48 : key)).toLowerCase();
+            var keyText = (String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key)).toLowerCase();
             self.$textarea.select2('search', keyText);
         }
     };
@@ -165,14 +172,13 @@
         this.$textarea.hide();
         Handsontable.editors.TextEditor.prototype.close.apply(this, arguments);
     };
-
-    Select2Editor.prototype.val = function (value) {
-        if (typeof value == 'undefined') {
-            return this.$textarea.val();
-        } else {
-            this.$textarea.val(value);
-        }
+    Select2Editor.prototype.getValue = function () {
+        return this.$textarea.val();
     };
+    Select2Editor.prototype.setValue = function () {
+        this.$textarea.val(this.originalValue);
+    };
+
 
     Select2Editor.prototype.focus = function () {
 
