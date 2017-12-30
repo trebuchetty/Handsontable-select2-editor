@@ -1,5 +1,6 @@
 /// select2 plugin
-(function (Handsontable) {
+(function($){
+	(function (Handsontable) {
     "use strict";
 
     var Select2Editor = Handsontable.editors.TextEditor.prototype.extend();
@@ -22,14 +23,14 @@
         this.TEXTAREA.setAttribute('type', 'text');
         this.$textarea = $(this.TEXTAREA);
 
-        Handsontable.Dom.addClass(this.TEXTAREA, 'handsontableInput');
+        Handsontable.dom.addClass(this.TEXTAREA, 'handsontableInput');
 
         this.textareaStyle = this.TEXTAREA.style;
         this.textareaStyle.width = 0;
         this.textareaStyle.height = 0;
 
         this.TEXTAREA_PARENT = document.createElement('DIV');
-        Handsontable.Dom.addClass(this.TEXTAREA_PARENT, 'handsontableInputHolder');
+        Handsontable.dom.addClass(this.TEXTAREA_PARENT, 'handsontableInputHolder');
 
         this.textareaParentStyle = this.TEXTAREA_PARENT.style;
         this.textareaParentStyle.top = 0;
@@ -76,7 +77,7 @@
 
         switch (event.keyCode) {
             case keyCodes.ARROW_RIGHT:
-                if (Handsontable.Dom.getCaretPosition(target) !== target.value.length) {
+                if (Handsontable.dom.getCaretPosition(target) !== target.value.length) {
                     event.stopImmediatePropagation();
                 } else {
                     that.$textarea.select2('close');
@@ -84,7 +85,7 @@
                 break;
 
             case keyCodes.ARROW_LEFT:
-                if (Handsontable.Dom.getCaretPosition(target) !== 0) {
+                if (Handsontable.dom.getCaretPosition(target) !== 0) {
                     event.stopImmediatePropagation();
                 } else {
                     that.$textarea.select2('close');
@@ -201,3 +202,4 @@
     Handsontable.editors.registerEditor('select2', Select2Editor);
 
 })(Handsontable);
+}(jQuery));
